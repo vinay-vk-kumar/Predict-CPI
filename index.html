@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Consumer Price Index Predictor</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .main-content {
+            padding: 40px;
+        }
+
+        .form-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .category-group {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 15px;
+            border-left: 4px solid #667eea;
+        }
+
+        .category-title {
+            font-size: 1.3em;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e9ecef;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #555;
+            font-size: 0.95em;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            font-size: 1em;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .form-group input:invalid {
+            border-color: #dc3545;
+        }
+
+        .controls {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin: 30px 0;
+        }
+
+        .btn {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+            transform: translateY(-2px);
+        }
+
+        .result-section {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            margin-top: 30px;
+            transform: scale(0.95);
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+
+        .result-section.show {
+            transform: scale(1);
+            opacity: 1;
+        }
+
+        .result-section h2 {
+            font-size: 2em;
+            margin-bottom: 15px;
+        }
+
+        .result-value {
+            font-size: 3em;
+            font-weight: 700;
+            margin: 20px 0;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .error-section {
+            background: linear-gradient(135deg, #dc3545 0%, #fd7e14 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            margin-top: 30px;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .info-box {
+            background: linear-gradient(135deg, #17a2b8 0%, #6610f2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+        }
+
+        .info-box h3 {
+            margin-bottom: 10px;
+        }
+
+        @media (max-width: 768px) {
+            .form-section {
+                grid-template-columns: 1fr;
+            }
+            
+            .controls {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .btn {
+                width: 100%;
+                max-width: 300px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏛️ Consumer Price Index Predictor</h1>
+            <p>Advanced ML-powered CPI prediction system for economic analysis</p>
+        </div>
+
+        <div class="main-content">
+            <div class="info-box">
+                <h3>📊 About CPI Prediction</h3>
+                <p>This tool uses machine learning to predict the Consumer Price Index based on various economic indicators across different sectors. Enter the index values for each category to get an accurate CPI prediction.</p>
+            </div>
+
+            <form id="cpiForm">
+                <div class="form-section">
+                    <div class="category-group">
+                        <div class="category-title">🥗 Food & Beverages</div>
+                        <div class="form-group">
+                            <label for="cereals">Cereals and products</label>
+                            <input type="number" id="cereals" step="0.01" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="meat">Meat and fish</label>
+                            <input type="number" id="meat" step="0.01" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="egg">Egg</label>
+                            <input type="number" id="egg" step="0.01" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="milk">Milk and products</label>
+                            <input type="number" id="milk" step="0.01" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="oils">Oils and fats</label>
+                            <input type="number" id="oils" step="0.01" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="fruits">Fruits</label>
+                            <input type="number" id="fruits" step="0.01" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="vegetables">Vegetables</label>
+                            <input type="number" id="vegetables" step="0.01" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="pulses">Pulses and products</label>
+                            <input type="number" id="pulses" step="0.01" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="sugar">Sugar and Confectionery</label>
+                            <input type="number" id="sugar" step="0.01" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="spices">Spices</label>
+                            <input type="number" id="spices" step="0.01" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="beverages">Non-alcoholic beverages</label>
+                            <input type="number" id="beverages" step="0.01" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="prepared">Prepared meals, snacks, sweets etc.</label>
+                            <input type="number" id="prepared" step="0.01" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="food_bev">Food and beverages</label>
+                            <input type="number" id="food_bev" step="0.01" required>
+                        </div>
+                    </div>
+
+                    <div class="category-group">
+                        <div class="category-title">🏠 Housing & Lifestyle</div>
+                        <div class="form-group">
+                            <label for="pan_tobacco">Pan, tobacco and intoxicants</label>
+                            <input type="number" id="pan_tobacco" step="0.01" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="clothing">Clothing</label>
+                            <input type="number" id="clothing" step="0.01" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="footwear">Footwear</label>
+                            <input type="number" id="footwear" step="0.01" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="cloth_foot">Clothing and footwear</label>
+                            <input type="number" id="cloth_foot" step="0.01" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="housing">Housing</label>
+                            <input type="number" id="housing" step="0.01" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="fuel">Fuel and light</label>
+                            <input type="number" id="fuel" step="0.01" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="household">Household goods and services</label>
+                            <input type="number" id="household" step="0.01" required>
+                        </div>
+                    </div>
+
+                    <div class="category-group">
+                        <div class="category-title">🚗 Services & Others</div>
+                        <div class="form-group">
+                            <label for="health">Health</label>
+                            <input type="number" id="health" step="0.01" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="transport">Transport and communication</label>
+                            <input type="number" id="transport" step="0.01" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="recreation">Recreation and amusement</label>
+                            <input type="number" id="recreation" step="0.01" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="education">Education</label>
+                            <input type="number" id="education" step="0.01" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="personal">Personal care and effects</label>
+                            <input type="number" id="personal" step="0.01" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="miscellaneous">Miscellaneous</label>
+                            <input type="number" id="miscellaneous" step="0.01" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="rural">Rural</label>
+                            <input type="number" id="rural" step="0.01" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="urban">Urban</label>
+                            <input type="number" id="urban" step="0.01" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="combined">Combined</label>
+                            <input type="number" id="combined" step="0.01" required>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="controls">
+                    <button type="submit" class="btn btn-primary">🔮 Predict CPI</button>
+                    <button type="button" class="btn btn-secondary" onclick="resetForm()">🔄 Reset Form</button>
+                </div>
+            </form>
+
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p>Processing your prediction...</p>
+            </div>
+
+            <div class="result-section" id="result" style="display: none;">
+                <h2>📈 CPI Prediction Result</h2>
+                <div class="result-value" id="resultValue">--</div>
+                <p>Predicted Consumer Price Index based on your inputs</p>
+            </div>
+
+            <div class="error-section" id="error" style="display: none;">
+                <h3>⚠️ Error</h3>
+                <p id="errorMessage">Something went wrong. Please try again.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Field mapping for API calls
+        const fieldMapping = {
+            cereals: 'Cereals and products',
+            meat: 'Meat and fish',
+            egg: 'Egg',
+            milk: 'Milk and products',
+            oils: 'Oils and fats',
+            fruits: 'Fruits',
+            vegetables: 'Vegetables',
+            pulses: 'Pulses and products',
+            sugar: 'Sugar and Confectionery',
+            spices: 'Spices',
+            beverages: 'Non-alcoholic beverages',
+            prepared: 'Prepared meals, snacks, sweets etc.',
+            food_bev: 'Food and beverages',
+            pan_tobacco: 'Pan, tobacco and intoxicants',
+            clothing: 'Clothing',
+            footwear: 'Footwear',
+            cloth_foot: 'Clothing and footwear',
+            housing: 'Housing',
+            fuel: 'Fuel and light',
+            household: 'Household goods and services',
+            health: 'Health',
+            transport: 'Transport and communication',
+            recreation: 'Recreation and amusement',
+            education: 'Education',
+            personal: 'Personal care and effects',
+            miscellaneous: 'Miscellaneous',
+            rural: 'Rural',
+            urban: 'Urban',
+            combined: 'Combined'
+        };
+
+        // Form submission handler
+        document.getElementById('cpiForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            // Show loading
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('result').style.display = 'none';
+            document.getElementById('error').style.display = 'none';
+            
+            try {
+                const prediction = await calculateCPI();
+                showResult(prediction);
+            } catch (error) {
+                showError('Error calculating CPI: ' + error.message);
+            }
+            
+            document.getElementById('loading').style.display = 'none';
+        });
+
+        async function calculateCPI() {
+            // Get all form values and map them to API field names
+            const formData = {};
+            
+            Object.keys(fieldMapping).forEach(formField => {
+                const input = document.getElementById(formField);
+                if (input && input.value) {
+                    formData[fieldMapping[formField]] = parseFloat(input.value);
+                } else {
+                    throw new Error(`Missing value for ${formField}`);
+                }
+            });
+            
+            // Make API call to Flask backend
+            const response = await fetch('/predict', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(formData)
+            });
+            
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.details || errorData.error || 'Prediction failed');
+            }
+            
+            const result = await response.json();
+            return result.prediction;
+        }
+
+        function showResult(prediction) {
+            document.getElementById('resultValue').textContent = prediction;
+            document.getElementById('result').style.display = 'block';
+            document.getElementById('result').classList.add('show');
+        }
+
+        function showError(message) {
+            document.getElementById('errorMessage').textContent = message;
+            document.getElementById('error').style.display = 'block';
+        }
+
+        function resetForm() {
+            document.getElementById('cpiForm').reset();
+            document.getElementById('result').style.display = 'none';
+            document.getElementById('error').style.display = 'none';
+            document.getElementById('result').classList.remove('show');
+        }
+
+        // Auto-fill with sample data for testing
+        async function fillSampleData() {
+            try {
+                const response = await fetch('/api/sample-data');
+                const sampleData = await response.json();
+                
+                // Map API field names back to form field names
+                const reverseMapping = {};
+                Object.keys(fieldMapping).forEach(formField => {
+                    reverseMapping[fieldMapping[formField]] = formField;
+                });
+                
+                Object.keys(sampleData).forEach(apiField => {
+                    const formField = reverseMapping[apiField];
+                    if (formField) {
+                        const input = document.getElementById(formField);
+                        if (input) {
+                            input.value = sampleData[apiField];
+                        }
+                    }
+                });
+            } catch (error) {
+                console.error('Error loading sample data:', error);
+                // Fallback to hardcoded sample data
+                const fallbackData = {
+                    cereals: 145.2, meat: 178.9, egg: 167.4, milk: 156.8, oils: 134.5,
+                    fruits: 189.3, vegetables: 201.7, pulses: 123.8, sugar: 145.6,
+                    spices: 167.2, beverages: 134.9, prepared: 156.7, food_bev: 167.8,
+                    pan_tobacco: 189.4, clothing: 145.6, footwear: 156.2, cloth_foot: 148.9,
+                    housing: 167.3, fuel: 178.5, household: 145.7, health: 189.2,
+                    transport: 156.8, recreation: 167.4, education: 178.9, personal: 145.3,
+                    miscellaneous: 167.6, rural: 156.8, urban: 167.4, combined: 162.1
+                };
+                
+                Object.keys(fallbackData).forEach(key => {
+                    const input = document.getElementById(key);
+                    if (input) {
+                        input.value = fallbackData[key];
+                    }
+                });
+            }
+        }
+
+        // Add a sample data button (for testing)
+        document.addEventListener('DOMContentLoaded', function() {
+            const controls = document.querySelector('.controls');
+            const sampleBtn = document.createElement('button');
+            sampleBtn.type = 'button';
+            sampleBtn.className = 'btn btn-secondary';
+            sampleBtn.innerHTML = '📋 Fill Sample Data';
+            sampleBtn.onclick = fillSampleData;
+            controls.appendChild(sampleBtn);
+        });
+    </script>
+</body>
+</html>
