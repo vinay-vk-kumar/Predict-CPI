@@ -15,9 +15,8 @@ A full-stack Flask application that uses a machine learning model (Lasso Regress
 6. [Frontend (HTML)](#frontend-html)  
 7. [How to Run Locally](#how-to-run-locally)  
 8. [API Endpoints](#api-endpoints)  
-9. [Demo & Screenshots](#demo--screenshots)  
-10. [Future Work](#future-work)  
-11. [Acknowledgments](#acknowledgments)
+9. [Future Work](#future-work)  
+10. [Acknowledgments](#acknowledgments)
 
 ---
 
@@ -59,9 +58,7 @@ This app enables quick, intuitive predictions from user-supplied CPI component d
   - Trains Lasso using `feature_columns`  
   - Evaluates using RMSE and R²  
   - Saved using `pickle` as `model.pkl`
-
-> See `model_training.ipynb` (optional notebook) for details.
-
+    
 ---
 
 ## 🌐 Flask App
@@ -91,13 +88,6 @@ This app enables quick, intuitive predictions from user-supplied CPI component d
   - Auto-generated input fields for all 29 CPI features  
   - Submits via `/predict` POST  
   - Displays rounded predictions  
-
-```html
-{% for col in columns %}
-  <label>{{ col }}</label>
-  <input name="{{ col }}" type="number" step="0.01" required>
-{% endfor %}
-```
 
 ---
 
@@ -132,12 +122,6 @@ This app enables quick, intuitive predictions from user-supplied CPI component d
 - `GET /api/features` → returns list of all feature column names  
 - `GET /api/sample-data` → returns example values for testing  
 - `POST /predict` → returns JSON with `prediction`, `model_type`, timestamp, or validation errors
-
----
-
-## 📷 Demo & Screenshots
-
-_Add your screenshots here_
 
 ---
 
